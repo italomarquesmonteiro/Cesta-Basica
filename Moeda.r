@@ -1,19 +1,6 @@
----
-title: ""
-author: ""
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r}
+#
 library(tidyverse)
-```
 
-```{r}
 moedas <- tibble::tribble(
   ~nome, ~cifrao, ~inicio, ~fim,
   "Cruzeiro", "Cr$", "01/11/1942", "12/12/1967",
@@ -31,4 +18,3 @@ moedas <- tibble::tribble(
     tempo_anos = round(lubridate::time_length(lubridate::interval(inicio, fim), "years")
     )) |> 
   readr::write_csv(".github\\.vscode\\Dataset\\Moedas.csv")
-```
