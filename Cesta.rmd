@@ -1,0 +1,163 @@
+---
+title: "Poder de compra da cesta básica com um salário-mínimo"
+author: "Ítalo Marques-Monteiro"
+date: "`r Sys.Date()`"
+output:  html_document
+---
+
+```{r}
+font <- "Josefin Sans"
+font2 <- "Open Sans"
+sysfonts::font_add_google(family = font, font, db_cache = FALSE)
+sysfonts::font_add_google(family = font2, font2, db_cache = FALSE)
+sysfonts::font_add(family = "Font Awesome 6 Brands", regular = "C:/Users/italo/AppData/Local/Microsoft/Windows/Fonts/Font Awesome 6 Brands-Regular-400.otf") # nolint
+showtext::showtext_opts(dpi = 300)
+showtext::showtext_auto(enable = TRUE)
+```
+
+```{r}
+github_icon <- "&#xf09b"
+linkedin_icon <- "&#xf0e1"
+x_icon <- "&#xf099"
+instagram_icon <- "&#xf16d"
+github_username <- "italomarquesmonteiro"
+linkedin_username <- "italomarquesmonteiro"
+x_username <- "italommonteiro"
+instagram_username <- "italo.m.m"
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+cb <- readr::read_csv(".github\\.vscode\\Dataset\\Cesta-Básica.csv") |>
+  tidyr::pivot_longer(!data, names_to = "Cidade", values_to = "cb") |>
+  dplyr::mutate(data = paste0("01/", data),    # Adicionar o dia "01" ao início de cada data
+         data = lubridate::dmy(data))
+
+media_nacional <- cb |>
+  dplyr::filter(data >= "1994-07-01") |>
+  dplyr::group_by(data = lubridate::floor_date(data, "month")) |>  # Agrupar por mês
+  dplyr::summarize(media_mensal = mean(cb, na.rm = TRUE))  # Calcular a média, ignorando valores ausentes
+
+#media_nacional |>
+#  ggplot(aes(data, media_mensal)) +
+#  geom_line()
+```
+
+```{r}
+salario_minimo <- readr::read_csv(".github\\.vscode\\Dataset\\Salário-Mínimo.csv") |>
+#salario_minimo <- readxl::read_xlsx("C:\\Users\\italo\\Downloads\\Histórico-Sálario-Mínimo-1940-2024.xlsx") |>
+# Transformar a coluna Data e Salário mínimo vigente
+  dplyr::rename(smv = `Salário mínimo vigente`, data = Data) |>
+  dplyr::mutate(
+    data = stringr::str_replace_all(data, "\\.", "-"),  # Substituir pontos por hífens
+    data = lubridate::ym(data),                         # Converter para tipo Date
+    smv = as.integer(smv) ) # Converter notação científica para inteiro
+
+#salario_minimo |>
+#  ggplot(aes(x = data, y = smv)) +
+#  geom_line()
+```
+
+```{r}
+cb_poa <- cb |>
+  dplyr::filter(data >= "1994-07-01" & Cidade == "Porto Alegre") |>
+  dplyr::inner_join(salario_minimo) |>
+  #dplyr::summarise( moda = statip::mfv(poder_compra_cb_sm)
+  dplyr::mutate(
+    poder_compra_cb_sm_poa = smv / cb,
+    media = mean(poder_compra_cb_sm_poa),
+    mediana = median(poder_compra_cb_sm_poa))
+
+cb_sc <- cb |>
+  dplyr::filter(data >= "1994-07-01" & Cidade == "Florianópolis") |>
+  dplyr::inner_join(salario_minimo) |>
+  #dplyr::summarise( moda = statip::mfv(poder_compra_cb_sm)
+  dplyr::mutate(
+    poder_compra_cb_sm_sc = smv / cb,
+    media = mean(poder_compra_cb_sm_sc),
+    mediana = median(poder_compra_cb_sm_sc))
+
+```
+
+```{r}
+poder_compra_cesta <- salario_minimo |>
+  dplyr::inner_join(media_nacional) |>
+  #dplyr::summarise( moda = statip::mfv(poder_compra_cb_sm)
+  dplyr::mutate(
+    poder_compra_cb_sm = smv / media_mensal,
+    media = mean(poder_compra_cb_sm),
+    mediana = median(poder_compra_cb_sm))
+
+#poder_compra_cesta |> 
+#  tail()
+#  dplyr::arrange(desc(poder_compra_cb_sm)) |>
+#  dplyr::arrange(poder_compra_cb_sm)
+```
+
+
+```{r}
+title_text <- glue::glue("Poder de Compra") 
+subtitle_text <- glue::glue(
+  "<b>Quantas Cestas Básicas o brasileiro compra com um salário-mínimo?</b><br>",
+  "<span style='font-size: 20px; color: grey50'><i>Desde a implantação do Plano Real,
+  quando um salário-mínimo<br> permitia a compra de 1,01 cesta básica em julho de 1994,
+até junho de 2024,<br>o poder de compra aumentou, permitindo adquirir 2,04 cestas básicas.</i></span>"
+)
+caption_text <- glue::glue(
+    "**Nota:** O valor da cesta básica é referente a média das 17 capitais acompanhadas.<br>",
+    "**Dados:** Departamento Intersindical de Estatística e Estudos Socioeconômicos (DIEESE, 2024)<br>",
+    "**Plot:** Ítalo Marques-Monteiro <br><br>",
+    "<span style='font-family:\"Font Awesome 6 Brands\"; color: black;'>{github_icon};</span> 
+    <span style='color: black'>{github_username}</span><br>",
+    "<span style='font-family:\"Font Awesome 6 Brands\"; color: dodgerblue4;'>{linkedin_icon};</span> 
+    <span style='color: black'>{linkedin_username}</span><br>",
+    "<span style='font-family:\"Font Awesome 6 Brands\"; color: steelblue;'>{x_icon};</span>
+    <span style='color: black'>{x_username}</span><br>",
+    "<span style='font-family:\"Font Awesome 6 Brands\"; color: red;'>{instagram_icon};</span>
+    <span style='color: black'>{instagram_username}</span>"
+)
+```
+
+```{r}
+grafico_cesta <- poder_compra_cesta |>
+  ggplot(aes(x = data, y = poder_compra_cb_sm)) +
+  geom_line(linewidth = 1.3, color = "grey20") +
+  #geom_line(data = cb_poa, aes(y = poder_compra_cb_sm_poa), linewidth = 1.3, color = "#1586b3") +
+  #geom_line(data = cb_sc, aes(y = poder_compra_cb_sm_sc), linewidth = 1.3, color = "#5cb315") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%b %Y") +
+  labs(
+      title = title_text,
+      subtitle = subtitle_text,
+      caption = caption_text,
+      x = "Período",
+      y = "Número de Cestas Básicas",
+    ) +
+    theme(
+        plot.title = ggtext::element_markdown(size = 30,face = "bold", family = font,  hjust = 0, color = "gray30",), # nolint
+        plot.caption = ggtext::element_markdown(size = 10,family = font, hjust = 0, margin = margin(10,0,0,0), color = "black", lineheight = 1.2), # nolint
+        plot.subtitle = ggtext::element_markdown(size = 25, family = font, color = "grey40",  hjust = 0),
+        panel.background = element_rect(fill = "white", color = "grey90"),
+        plot.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(color = "grey90", size = 0.3),
+        panel.grid = element_line(color = "white"),
+        legend.background = element_blank(),
+        legend.position = c(0.5, 0.8),
+        legend.key = element_rect(fill = "grey95", color = "grey95"),
+        legend.text = element_text(color = "grey40", size = 12),
+        legend.title = element_text(face = "bold", color = "grey40", size = 12),
+        axis.title.y = ggtext::element_markdown(face = "bold", family = font2,size = 12, color = "gray50"), # nolint,
+        axis.text.y = ggtext::element_markdown(face = "bold", family = font2,size = 9, hjust = 0, color = "gray50"), # nolint,
+        axis.title.x = element_blank(),
+        axis.text.x = ggtext::element_markdown(
+          face = "bold", family = font2 ,size = 9, color = "gray50", angle = 90, hjust = 1),# nolint
+        axis.line.x = element_line(linewidth = .75, color = "grey60")
+    )
+grafico_cesta
+```
+
+```{r}
+ggsave(".github\\.vscode\\Dataset\\Image\\Cesta-Básica.png", plot = grafico_cesta, dpi = 300 )
+```
