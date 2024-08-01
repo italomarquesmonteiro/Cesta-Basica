@@ -159,5 +159,5 @@ grafico_cesta
 ```
 
 ```{r}
-ggsave(".github\\.vscode\\Dataset\\Image\\Cesta-Básica.png", plot = grafico_cesta, dpi = 300 )
+ggsave(".github\\.vscode\\Image\\Cesta-Básica.png", plot = grafico_cesta, dpi = 300 )
 ```
