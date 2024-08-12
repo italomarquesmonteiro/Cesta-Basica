@@ -1,0 +1,38 @@
+---
+
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+ipca = sidrar::get_sidra(api = '/t/1737/n1/all/v/2266/p/all/d/v2266%2013') |>
+  dplyr::mutate(date = parse_date(`Mês (Código)`, format = "%Y%m")) |>
+  dplyr::mutate(inflacao_mensal = (Valor/lag(Valor,1)-1)*100,
+         inflacao_anual = (Valor/lag(Valor,12)-1)*100) |>
+  dplyr::rename(indice = Valor) |>
+  dplyr::select(date, indice, inflacao_mensal, inflacao_anual) |>
+  as_tibble()
+```
+
+```{r}
+ipca_anual <- ipca |>
+  dplyr::group_by(
+       ano = year(date)
+  ) |>
+  dplyr::filter(date == max(date)) |>
+  dplyr::filter(ano >= 1994)
+
+
+```
+
+```{r}
+ipca_anual |>
+  tail()
+```
+
+```{r}
+
+```
+
