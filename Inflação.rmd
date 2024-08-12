@@ -23,8 +23,6 @@ ipca_anual <- ipca |>
   ) |>
   dplyr::filter(date == max(date)) |>
   dplyr::filter(ano >= 1994)
-
-
 ```
 
 ```{r}
