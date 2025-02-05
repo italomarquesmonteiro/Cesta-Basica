@@ -31,6 +31,14 @@ library(tidyverse)
 ```
 
 ```{r}
+df <- readxl::read_xlsx("c:\\Users\\italo\\Downloads\\exporta.xlsx") |>
+  dplyr::full_join(cb) |>
+  dplyr::arrange(data) |>
+  readr::write_csv(".github\\.vscode\\Dataset\\Cesta-Básica.csv")
+
+```
+
+```{r}
 cb <- readr::read_csv(".github\\.vscode\\Dataset\\Cesta-Básica.csv") |>
   tidyr::pivot_longer(!data, names_to = "Cidade", values_to = "cb") |>
   dplyr::mutate(data = paste0("01/", data),    # Adicionar o dia "01" ao início de cada data
@@ -41,9 +49,9 @@ media_nacional <- cb |>
   dplyr::group_by(data = lubridate::floor_date(data, "month")) |>  # Agrupar por mês
   dplyr::summarize(media_mensal = mean(cb, na.rm = TRUE))  # Calcular a média, ignorando valores ausentes
 
-#media_nacional |>
-#  ggplot(aes(data, media_mensal)) +
-#  geom_line()
+media_nacional |>
+  ggplot(aes(data, media_mensal)) +
+  geom_line()
 ```
 
 ```{r}
@@ -91,10 +99,10 @@ poder_compra_cesta <- salario_minimo |>
     media = mean(poder_compra_cb_sm),
     mediana = median(poder_compra_cb_sm))
 
-#poder_compra_cesta |> 
-#  tail()
-#  dplyr::arrange(desc(poder_compra_cb_sm)) |>
-#  dplyr::arrange(poder_compra_cb_sm)
+poder_compra_cesta |> 
+  tail()
+  dplyr::arrange(desc(poder_compra_cb_sm)) |>
+  dplyr::arrange(poder_compra_cb_sm)
 ```
 
 
@@ -104,7 +112,7 @@ subtitle_text <- glue::glue(
   "<b>Quantas Cestas Básicas o brasileiro compra com um salário-mínimo?</b><br>",
   "<span style='font-size: 20px; color: grey50'><i>Desde a implantação do Plano Real,
   quando um salário-mínimo<br> permitia a compra de 1,01 cesta básica em julho de 1994,
-até junho de 2024,<br>o poder de compra aumentou, permitindo adquirir 2,04 cestas básicas.</i></span>"
+em dezembro de 2024,<br>o poder de compra aumentou, permitindo adquirir 2,09 cestas básicas.</i></span>"
 )
 caption_text <- glue::glue(
     "**Nota:** O valor da cesta básica é referente a média das 17 capitais acompanhadas.<br>",
