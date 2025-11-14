@@ -20,16 +20,21 @@ print(cesta.head())
 
 # --- 2. Converter de largo → longo mantendo “Mês-Ano” como ID ---
 df_long = cesta.melt(
-    id_vars=["Mês-Ano"],   
+    id_vars=["data"],   
     var_name="Cidade",
     value_name="Valor_Cesta"
+)
+
+# --- 3. Ordenar por data DESC e cidade ASC ---
+df_long = df_long.sort_values(
+    by=["data", "Cidade"],
+    ascending=[False, True]
 )
 
 print("\nFormato convertido (long):")
 print(df_long.head())
 
 # --- 3. Salvar ---
-saida = ".github/.vscode/Dataset/Cesta-Básica-Long.csv"
-df_long.to_csv(saida, index=False)
+df_long.to_csv(".github/.vscode/Dataset/Cesta-Básica-Long.csv", index=False)
 
-print(f"\nArquivo salvo em: {saida}")
+print(f"\nArquivo salvo em: {df_long}")
