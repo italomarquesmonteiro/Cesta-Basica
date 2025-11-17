@@ -5,24 +5,25 @@
 #             cesta básica e o salário mínimo no Brasil,
 #             comparando evolução histórica, poder de compra,
 #             e percentuais comprometidos da renda.
-# Versão: 1.0
+# Versão: 1.2 (corrigida com Font Awesome funcional)
 # Contato: https://github.com/italomarquesmonteiro
 # ============================================================
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
 # =========================
-# ÍCONES E IDENTIDADE
+# ÍCONES (unicode + estilo correto)
 # =========================
-github_icon = "&#xf09b;"
-linkedin_icon = "&#xf0e1;"
-x_icon = "&#xf099;"
-instagram_icon = "&#xf16d;"
+github_icon    = "<span style='font-family:\"Font Awesome 6 Brands\"; font-weight:400;'>&#xf09b;</span>"
+linkedin_icon  = "<span style='font-family:\"Font Awesome 6 Brands\"; font-weight:400;'>&#xf0e1;</span>"
+x_icon         = "<span style='font-family:\"Font Awesome 6 Brands\"; font-weight:400;'>&#xf099;</span>"
+instagram_icon = "<span style='font-family:\"Font Awesome 6 Brands\"; font-weight:400;'>&#xf16d;</span>"
 
-github_user = "italomarquesmonteiro"
-linkedin_user = "italomarquesmonteiro"
-x_user = "italommonteiro"
+github_user    = "italomarquesmonteiro"
+linkedin_user  = "italomarquesmonteiro"
+x_user         = "italommonteiro"
 instagram_user = "italo.m.m"
 
 # =========================
@@ -63,9 +64,9 @@ SUBTITULO = (
 )
 
 CREDITOS = (
-    f"<span style='font-size:11px; color:#929292;'>"
+    "<span style='font-size:11px; color:#929292;'>"
     "<b>Fonte:</b> DIEESE — média de 17 capitais brasileiras.<br>"
-    "<b>Visualização:</b> Ítalo Marques Monteiro<br>"
+    "<b>Visualização:</b> Ítalo Marques Monteiro<br><br>"
     f"{github_icon} {github_user} &nbsp;&nbsp; "
     f"{linkedin_icon} {linkedin_user} &nbsp;&nbsp; "
     f"{x_icon} {x_user} &nbsp;&nbsp; "
@@ -84,15 +85,15 @@ fig = px.line(
 fig.update_traces(line=dict(width=3), mode="lines")
 fig.update_layout(
     template="plotly_dark",
-    title=dict(text=TITULO + "<br><sup>" + SUBTITULO + "</sup>", x=0.02, y=0.97),
+    title=dict(text=TITULO + "<br><sup>" + SUBTITULO + "</sup>", x=0.02),
     xaxis_title="Ano / Mês",
     yaxis_title="Cestas Básicas",
     hovermode="x unified",
-    margin=dict(l=60, r=60, t=120, b=160),  # aumentei a base
+    margin=dict(l=60, r=60, t=120, b=160),
     font=dict(family="Arial", size=13, color="#E0E0E0")
 )
 
-# Área destacada da pandemia
+# Faixa da Pandemia
 fig.add_vrect(
     x0="2020-03", x1="2022-12",
     fillcolor="red", opacity=0.14,
@@ -102,17 +103,24 @@ fig.add_vrect(
     annotation_font_color="red"
 )
 
-# Créditos (ajustado)
+# Créditos (anotação inferior)
 fig.add_annotation(
-    text=CREDITOS,
-    showarrow=False,
+    text=CREDITOS, showarrow=False,
     xref="paper", yref="paper",
-    x=0, y=-0.18,
-    align="left"
+    x=0, y=-0.18, align="left"
 )
 
 fig.show()
 
-# Exportação responsiva
-fig.write_html("poder_de_compra_interativo.html", include_plotlyjs="cdn", full_html=True)
-print("Arquivo salvo com sucesso!")
+# =========================
+# Exportação — HTML com Font Awesome habilitado
+# =========================
+extra_header = """
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+"""
+
+with open("poder_de_compra_interativo.html", "w", encoding="utf-8") as f:
+    f.write(extra_header + fig.to_html(include_plotlyjs="cdn", full_html=False))
+
+print("Arquivo salvo com sucesso com ícones funcionais!")
+
